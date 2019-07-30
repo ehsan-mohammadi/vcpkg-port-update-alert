@@ -11,7 +11,7 @@ namespace vcpkg_port_update_alert
             VcpkgMessage.NormalMessage("vcpkg port update alert\n");
             VcpkgMessage.NormalMessage("Version 1.0\n");
             VcpkgMessage.NormalMessage("By Ehsan Mohammadi\n\n");
-            VcpkgMessage.NormalMessage("Press any key to start checking vcpkg ports...");
+            VcpkgMessage.NormalMessage("Press any key to start checking vcpkg ports...\n");
         }
 
         static void Main(string[] args)
