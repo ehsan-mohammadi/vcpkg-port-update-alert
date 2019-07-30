@@ -101,6 +101,32 @@ namespace VCPKG
             return repoRef;
         }
 
+        /// <summary>
+        /// Search a port and get the latest release of it
+        /// </summary>
+        private async Task<string> SearchLatestRelease(RepoRef port)
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                var url = $"https://github.com/{port.Repo}/releases";
+                
+                HttpClient httpClient = new HttpClient();
+                string releases = await httpClient.GetStringAsync(url);
+
+                HtmlDocument htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(releases);
+                HtmlNode htmlNode = htmlDocument.DocumentNode.SelectSingleNode("//span[@class='css-truncate-target']");
+                string latestRelease = htmlNode.InnerText;
+
+                return latestRelease;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
+        }
+
         public async Task GetVcpkgRepo()
         {
             SetHttpClient();
@@ -117,6 +143,8 @@ namespace VCPKG
                 {
                     Console.WriteLine(a.Repo);
                     Console.WriteLine(a.Ref);
+                    string b = await SearchLatestRelease(a);
+                    Console.WriteLine(b);
                 }
             }
         }
