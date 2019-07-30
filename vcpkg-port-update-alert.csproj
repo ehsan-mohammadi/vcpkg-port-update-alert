@@ -6,4 +6,8 @@
     <RootNamespace>vcpkg_port_update_alert</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
+
 </Project>
