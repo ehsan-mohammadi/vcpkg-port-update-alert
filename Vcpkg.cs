@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
+using HtmlAgilityPack;
 
 namespace VCPKG
 {
@@ -14,6 +16,13 @@ namespace VCPKG
     {
         private const string repoAddress = "microsoft/vcpkg";
         private static HttpClient httpClient;
+
+        // A class that callback the Repo and Ref from the portfile.cmake file
+        private class RepoRef
+        {
+            public string Repo {get; set;}
+            public string Ref {get; set;}
+        }
 
         /// <summary>
         /// Set the BaseAddress and DefaultRequestHeaders on httpClient
@@ -52,12 +61,44 @@ namespace VCPKG
         /// <summary>
         /// Get the content of portfile.cmake and return it as a string
         /// </summary> 
-        private async Task<string> GetPortFileCMake(string portName)
+        private async Task<RepoRef> GetPortFileCMake(string portName)
         {
-            //HttpClient httpClient = new HttpClient();
-            string portFileCMake = await httpClient.GetStringAsync($"https://github.com/{repoAddress}/ports/{portName}/portfile.cmake");
-            Console.WriteLine(portFileCMake);
-            return portFileCMake;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            var url = $"https://github.com/{repoAddress}/blob/master/ports/{portName}/portfile.cmake";
+            
+            HttpClient httpClient = new HttpClient();
+            string portFileCMake = await httpClient.GetStringAsync(url);
+            RepoRef repoRef = GetRepoAndRef(portFileCMake);
+            
+            return repoRef;
+        }
+
+        /// <summary>
+        /// Get the REPO and REF property from portfile.cmake and return it as a string array
+        /// </summary>
+        private RepoRef GetRepoAndRef(string portFileCMake)
+        {
+            RepoRef repoRef = new RepoRef();
+
+            HtmlDocument htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(portFileCMake);
+            List<HtmlNode> htmlNodeList = htmlDocument.DocumentNode.SelectNodes("//td")
+                    .Where(node => node.GetAttributeValue("class", "")
+                    .Equals("blob-code blob-code-inner js-file-line")).ToList();
+
+            foreach(HtmlNode node in htmlNodeList)
+            {
+                // Find REPO and REF lines
+                if(node.InnerText.Contains(" REPO "))
+                    repoRef.Repo = node.InnerText.Replace(" ", "");
+                else if(node.InnerText.Contains(" REF "))
+                    repoRef.Ref = node.InnerText.Replace(" ", "");
+
+                if(repoRef.Repo != null && repoRef.Ref != null)
+                    break;
+            }
+
+            return repoRef;
         }
 
         public async Task GetVcpkgRepo()
@@ -68,8 +109,15 @@ namespace VCPKG
             
             foreach(string item in lst)
             {
-                Console.WriteLine(item);
-                string a = await GetPortFileCMake(item);
+                //Console.WriteLine(item);
+
+                RepoRef a = await GetPortFileCMake(item);
+
+                if(a.Repo != null && a.Ref != null)
+                {
+                    Console.WriteLine(a.Repo);
+                    Console.WriteLine(a.Ref);
+                }
             }
         }
     }
