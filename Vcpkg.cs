@@ -7,6 +7,8 @@ using Newtonsoft.Json.Linq;
 
 namespace VCPKG
 {
+    using VCPKG.Message;
+
     // A class for accessing to vcpkg
     public class Vcpkg
     {
@@ -42,7 +44,7 @@ namespace VCPKG
             }
             catch(Exception)
             {
-                Console.WriteLine("Can't connect to the server :(");
+                VcpkgMessage.ErrorMessage("Can't connect to the vcpkg GitHub repo :(");
                 return null;
             }
         }
