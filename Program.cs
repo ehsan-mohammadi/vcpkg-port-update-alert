@@ -1,5 +1,6 @@
 ﻿using System;
 using VCPKG;
+using VCPKG.Message;
 
 namespace vcpkg_port_update_alert
 {
@@ -7,11 +8,10 @@ namespace vcpkg_port_update_alert
     {
         static void PrintHeaders()
         {
-            Console.WriteLine("vcpkg port update alert");
-            Console.WriteLine("Version 1.0");
-            Console.WriteLine("By Ehsan Mohammadi");
-            Console.WriteLine();
-            Console.WriteLine("Press any key to start checking ports...");
+            VcpkgMessage.NormalMessage("vcpkg port update alert\n");
+            VcpkgMessage.NormalMessage("Version 1.0\n");
+            VcpkgMessage.NormalMessage("By Ehsan Mohammadi\n\n");
+            VcpkgMessage.NormalMessage("Press any key to start checking vcpkg ports...");
         }
 
         static void Main(string[] args)
