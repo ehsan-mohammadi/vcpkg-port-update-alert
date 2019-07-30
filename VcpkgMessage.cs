@@ -31,5 +31,14 @@ namespace VCPKG.Message
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write(message);
         }
+
+        /// <summary>
+        /// Clear a line with the length spaces
+        /// </summary> 
+        public static void ClearLine(int line, int length)
+        {
+            for(int i = 0; i < length; i++)
+                Console.Write(" ");
+        }
     }
 }

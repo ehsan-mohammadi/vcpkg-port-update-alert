@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using VCPKG;
 using VCPKG.Message;
 using VCPKG.CallBack;
@@ -14,26 +15,77 @@ namespace vcpkg_port_update_alert
             VcpkgMessage.NormalMessage("vcpkg port update alert\n");
             VcpkgMessage.NormalMessage("Version 1.0\n");
             VcpkgMessage.NormalMessage("By Ehsan Mohammadi\n\n");
-            VcpkgMessage.NormalMessage("Press any key to start checking vcpkg ports...\n");
+            VcpkgMessage.NormalMessage("Press any key to start checking vcpkg ports...");
         }
 
-        static async Task Main(string[] args)
+        static async Task AsyncMain()
         {
-            PrintHeaders();
-            Console.ReadKey();
-
+            // Initialize
             Vcpkg vcpkg = new Vcpkg();
             vcpkg.SetHttpClient();
 
+            // Fetching ports
+            VcpkgMessage.NormalMessage("\n\n> Fetching ports... (It may take a few seconds)");
             IEnumerable<string> ports = await vcpkg.GetPorts();
+            VcpkgMessage.NormalMessage("\n> Ports successfully fetched\n");
 
+            // Some settings for console output
+            int currentLine = Console.CursorTop + 1;
+            int clearLength = 0;
+            int percent = 0;
+            int portsCount = ports.ToList().Count;
+
+            // Looking for need-to-be-updated ports
             foreach(string port in ports)
             {
-                RepoRef currentPort = await vcpkg.GetPortFileCMake(port);
-                
+                percent++;
+                Console.SetCursorPosition(0, currentLine - 1);
+                VcpkgMessage.NormalMessage($"> Looking for need-to-be-updated ports... ({100 * percent / portsCount}%)");
+
+                // Reset the line
+                Console.SetCursorPosition(0, currentLine);
+                VcpkgMessage.ClearLine(currentLine, clearLength);
+
+                // Show the current port
+                Console.SetCursorPosition(0, currentLine);
+                VcpkgMessage.NormalMessage($"> Current port: \"{port}\"");
+                clearLength = 18 + port.Length;
+
+                // Get the port REPO and REF
+                RepoRef portRepoRef = await vcpkg.GetRepoAndRef(port);
+
+                if(vcpkg.HasRepoAndRef(portRepoRef))
+                {
+                    string latestRelease = await vcpkg.SearchLatestRelease(portRepoRef.Repo);
+                    
+                    // Show need-to-be-update port
+                    if(vcpkg.PortNeedToUpdate(portRepoRef.Ref, latestRelease))
+                    {
+                        Console.SetCursorPosition(0, currentLine - 1);
+                        ++currentLine;
+                        VcpkgMessage.WarningMessage($"\"{port}\" need to update from \"{portRepoRef.Ref}\" to \"{latestRelease}\" version.");
+                        VcpkgMessage.NormalMessage("");
+                    }
+                }
             }
 
+            // Finish
+            VcpkgMessage.NormalMessage("\n\n> All ports checked!\n");
+            VcpkgMessage.NormalMessage("Press any key to quit...");
+        }
+
+        static void Main(string[] args)
+        {
+            // Show the header
+            PrintHeaders();
             Console.ReadKey();
+
+            // Start vcpkg-port-update-alert
+            AsyncMain().Wait();
+
+            // Reset the color and quit
+            Console.ReadKey();
+            Console.ResetColor();
         }
     }
 }
