@@ -25,7 +25,7 @@ It's so easy!
 
 When you running the program, if `need-to-be-update` port found, it will be shown as a yellow text. So, you should to go to the vcpkg repository, click on the port folder and look for a folder that have the same name with the yellow text port. Then try to update it and create a pull request to the `microsoft/vcpkg`.
 
-**Note:** Read the [`ncpkg contributing`](https://github.com/microsoft/vcpkg/blob/master/CONTRIBUTING.md) carefully.
+**Note:** Read the [`vcpkg contributing`](https://github.com/microsoft/vcpkg/blob/master/CONTRIBUTING.md) carefully.
 
 Here is a sample of my PR for vcpkg: [My Pull request to vcpkg: `Update [ecm] port`](https://github.com/microsoft/vcpkg/pull/7457)
 
