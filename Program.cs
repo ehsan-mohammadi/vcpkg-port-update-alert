@@ -76,7 +76,8 @@ namespace vcpkg_port_update_alert
 
         static void Main(string[] args)
         {
-            // Show the header
+            // Set console title and Show the header
+            Console.Title = "vcpkg-port-update-alert - version: 1.0";
             PrintHeaders();
             Console.ReadKey();
 
