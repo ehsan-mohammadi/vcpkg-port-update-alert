@@ -10,6 +10,7 @@ using HtmlAgilityPack;
 namespace VCPKG
 {
     using VCPKG.Message;
+    using VCPKG.CallBack;
 
     // A class for accessing to vcpkg
     public class Vcpkg
@@ -17,17 +18,10 @@ namespace VCPKG
         private const string repoAddress = "microsoft/vcpkg";
         private static HttpClient httpClient;
 
-        // A class that callback the Repo and Ref from the portfile.cmake file
-        private class RepoRef
-        {
-            public string Repo {get; set;}
-            public string Ref {get; set;}
-        }
-
         /// <summary>
         /// Set the BaseAddress and DefaultRequestHeaders on httpClient
         /// </summary>  
-        private void SetHttpClient()
+        public void SetHttpClient()
         {
             httpClient = new HttpClient
             {
@@ -41,7 +35,7 @@ namespace VCPKG
         /// <summary>
         /// Get the vcpkg ports from github repo and store it in a list
         /// </summary> 
-        private async Task<IEnumerable<string>> GetPorts()
+        public async Task<IEnumerable<string>> GetPorts()
         {
             try
             {
@@ -61,7 +55,7 @@ namespace VCPKG
         /// <summary>
         /// Get the content of portfile.cmake and return it as a string
         /// </summary> 
-        private async Task<RepoRef> GetPortFileCMake(string portName)
+        public async Task<RepoRef> GetPortFileCMake(string portName)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
             var url = $"https://github.com/{repoAddress}/blob/master/ports/{portName}/portfile.cmake";
