@@ -90,9 +90,9 @@ namespace VCPKG
             {
                 // Find REPO and REF lines
                 if(node.InnerText.Contains(" REPO "))
-                    repoRef.Repo = node.InnerText.Replace(" ", "");
+                    repoRef.Repo = node.InnerText.Replace(" ", "").Substring(4);
                 else if(node.InnerText.Contains(" REF "))
-                    repoRef.Ref = node.InnerText.Replace(" ", "");
+                    repoRef.Ref = node.InnerText.Replace(" ", "").Substring(3);
 
                 if(repoRef.Repo != null && repoRef.Ref != null)
                     break;
