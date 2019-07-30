@@ -55,24 +55,25 @@ namespace VCPKG
         /// <summary>
         /// Get the content of portfile.cmake and return it as a string
         /// </summary> 
-        public async Task<RepoRef> GetPortFileCMake(string portName)
+        private async Task<string> GetPortFileCMake(string portName)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
             var url = $"https://github.com/{repoAddress}/blob/master/ports/{portName}/portfile.cmake";
             
             HttpClient httpClient = new HttpClient();
             string portFileCMake = await httpClient.GetStringAsync(url);
-            RepoRef repoRef = GetRepoAndRef(portFileCMake);
             
-            return repoRef;
+            return portFileCMake;
         }
 
         /// <summary>
-        /// Get the REPO and REF property from portfile.cmake and return it as a string array
+        /// Get the REPO and REF property from portfile.cmake and return it as a RepoRef
         /// </summary>
-        private RepoRef GetRepoAndRef(string portFileCMake)
+        public async Task<RepoRef> GetRepoAndRef(string portName)
         {
             RepoRef repoRef = new RepoRef();
+
+            string portFileCMake = await GetPortFileCMake(portName);
 
             HtmlDocument htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(portFileCMake);
@@ -96,9 +97,17 @@ namespace VCPKG
         }
 
         /// <summary>
+        /// Check a port has both REPO and REF property
+        /// </summary>
+        public bool HasRepoAndRef(RepoRef port)
+        {
+            return (port.Repo != null && port.Ref != null) ? true : false;
+        }
+
+        /// <summary>
         /// Search a port and get the latest release of it
         /// </summary>
-        private async Task<string> SearchLatestRelease(string repo)
+        public async Task<string> SearchLatestRelease(string repo)
         {
             try
             {
@@ -124,7 +133,7 @@ namespace VCPKG
         /// <summary>
         /// Compare the current release and latest release versions
         /// </summary>
-        private bool PortNeedToUpdate(string currentRelease, string latestRelease)
+        public bool PortNeedToUpdate(string currentRelease, string latestRelease)
         {
             if(latestRelease != null && currentRelease != latestRelease)
                 return true;
@@ -140,9 +149,9 @@ namespace VCPKG
             
             foreach(string item in lst)
             {
-                //Console.WriteLine(item);
+                Console.WriteLine(item);
 
-                RepoRef a = await GetPortFileCMake(item);
+                RepoRef a = await GetRepoAndRef(item);
 
                 if(a.Repo != null && a.Ref != null)
                 {
