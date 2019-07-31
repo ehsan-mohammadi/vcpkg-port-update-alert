@@ -2,6 +2,9 @@
 
 > Alerts which vcpkg ports need to be updated
 
+[![Build Status](https://travis-ci.org/ehsan-mohammadi/vcpkg-port-update-alert.svg?branch=master)](https://travis-ci.org/ehsan-mohammadi/vcpkg-port-update-alert)
+[![License](https://img.shields.io/github/license/ehsan-mohammadi/vcpkg-port-update-alert.svg?color=blue&label=License)](../master/LICENSE)
+
 It's great that you can contribute to Microsoft Open-Source projects!
 <br/>
 One of these projects is [vcpkg](https://github.com/microsoft/vcpkg). You know vcpkg has many ports, and these ports need to be updated when a new release of them is available.
