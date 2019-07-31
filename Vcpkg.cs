@@ -47,7 +47,8 @@ namespace VCPKG
             }
             catch(Exception)
             {
-                VcpkgMessage.ErrorMessage("Can't connect to the vcpkg GitHub repo :(");
+                VcpkgMessage.ErrorMessage("Error: Can't connect to the vcpkg GitHub repo :(\n");
+                Console.ResetColor();
                 return null;
             }
         }
