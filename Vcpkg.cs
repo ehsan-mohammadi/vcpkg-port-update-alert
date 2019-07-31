@@ -141,28 +141,5 @@ namespace VCPKG
             
             return false;
         }
-
-        public async Task GetVcpkgRepo()
-        {
-            SetHttpClient();
-
-            IEnumerable<string> lst = await GetPorts();
-            
-            foreach(string item in lst)
-            {
-                Console.WriteLine(item);
-
-                RepoRef a = await GetRepoAndRef(item);
-
-                if(a.Repo != null && a.Ref != null)
-                {
-                    Console.WriteLine(a.Repo);
-                    Console.WriteLine(a.Ref);
-                    string b = await SearchLatestRelease(a.Repo);
-                    
-                    Console.WriteLine(PortNeedToUpdate(a.Ref, b));
-                }
-            }
-        }
     }
 }
