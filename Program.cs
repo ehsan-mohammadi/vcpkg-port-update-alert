@@ -72,8 +72,13 @@ namespace vcpkg_port_update_alert
                     }
                 }
 
+                // Remove last port check in the currentLine
+                Console.SetCursorPosition(0, currentLine);
+                VcpkgMessage.ClearLine(currentLine, clearLength);
+                Console.SetCursorPosition(0, currentLine);
+
                 // Finish
-                VcpkgMessage.NormalMessage("\n\n> All ports checked!\n");
+                VcpkgMessage.NormalMessage("\n> All ports checked!\n");
                 VcpkgMessage.NormalMessage("Press any key to quit...");
             }
         }
