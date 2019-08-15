@@ -58,13 +58,20 @@ namespace VCPKG
         /// </summary> 
         private async Task<string> GetPortFileCMake(string portName)
         {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-            var url = $"https://github.com/{repoAddress}/blob/master/ports/{portName}/portfile.cmake";
-            
-            HttpClient httpClient = new HttpClient();
-            string portFileCMake = await httpClient.GetStringAsync(url);
-            
-            return portFileCMake;
+            try
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                var url = $"https://github.com/{repoAddress}/blob/master/ports/{portName}/portfile.cmake";
+                
+                HttpClient httpClient = new HttpClient();
+                string portFileCMake = await httpClient.GetStringAsync(url);
+                
+                return portFileCMake;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -74,24 +81,31 @@ namespace VCPKG
         {
             RepoRef repoRef = new RepoRef();
 
-            string portFileCMake = await GetPortFileCMake(portName);
-
-            HtmlDocument htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(portFileCMake);
-            List<HtmlNode> htmlNodeList = htmlDocument.DocumentNode.SelectNodes("//td")
-                    .Where(node => node.GetAttributeValue("class", "")
-                    .Equals("blob-code blob-code-inner js-file-line")).ToList();
-
-            foreach(HtmlNode node in htmlNodeList)
+            try
             {
-                // Find REPO and REF lines
-                if(node.InnerText.Contains(" REPO "))
-                    repoRef.Repo = node.InnerText.Replace(" ", "").Substring(4);
-                else if(node.InnerText.Contains(" REF "))
-                    repoRef.Ref = node.InnerText.Replace(" ", "").Substring(3);
+                string portFileCMake = await GetPortFileCMake(portName);
 
-                if(repoRef.Repo != null && repoRef.Ref != null)
-                    break;
+                HtmlDocument htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(portFileCMake);
+                List<HtmlNode> htmlNodeList = htmlDocument.DocumentNode.SelectNodes("//td")
+                        .Where(node => node.GetAttributeValue("class", "")
+                        .Equals("blob-code blob-code-inner js-file-line")).ToList();
+
+                foreach(HtmlNode node in htmlNodeList)
+                {
+                    // Find REPO and REF lines
+                    if(node.InnerText.Contains(" REPO "))
+                        repoRef.Repo = node.InnerText.Replace(" ", "").Substring(4);
+                    else if(node.InnerText.Contains(" REF "))
+                        repoRef.Ref = node.InnerText.Replace(" ", "").Substring(3);
+
+                    if(repoRef.Repo != null && repoRef.Ref != null)
+                        break;
+                }
+            }
+            catch(Exception)
+            {
+                // Do nothing!
             }
 
             return repoRef;
