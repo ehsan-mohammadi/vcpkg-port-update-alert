@@ -66,8 +66,14 @@ namespace vcpkg_port_update_alert
                         {
                             Console.SetCursorPosition(0, currentLine - 1);
                             ++currentLine;
-                            VcpkgMessage.WarningMessage($"\"{port}\" need to update from \"{portRepoRef.Ref}\" to \"{latestRelease}\" version.");
+
+                            string updatePort = $"\"{port}\" need to update from \"{portRepoRef.Ref}\" to \"{latestRelease}\" version.";
+                            
+                            VcpkgMessage.WarningMessage(updatePort);
                             VcpkgMessage.NormalMessage("");
+
+                            // Add port to the log list
+                            vcpkg.AddToLog(updatePort);
                         }
                     }
                 }
@@ -78,8 +84,40 @@ namespace vcpkg_port_update_alert
                 Console.SetCursorPosition(0, currentLine);
 
                 // Finish
-                VcpkgMessage.NormalMessage("\n> All ports checked!\n");
-                VcpkgMessage.NormalMessage("Press any key to quit...");
+                VcpkgMessage.NormalMessage("\n> All ports checked!\n\n");
+            }
+        }
+
+        static void SaveLog()
+        {
+            Console.ResetColor();
+
+            while(true)
+            {
+                VcpkgMessage.NormalMessage("> Do you want to save ports in a log file? (y/n) ");
+                string answer = Console.ReadLine();
+
+                if(answer.ToLower() == "y")
+                {
+                    VcpkgMessage.NormalMessage("> Enter the destination file path: ");
+                    string path = Console.ReadLine();
+
+                    Vcpkg vcpkg = new Vcpkg();
+                    if(vcpkg.SaveLog(path))
+                    {
+                        VcpkgMessage.NormalMessage("\n> File successfully saved!\n\n");
+                        break;
+                    }
+                    else
+                    {
+                        VcpkgMessage.ErrorMessage("\n> Can't save the file. try again... (See EXAMPLE: C:\\ports.log)\n\n");
+                        Console.ResetColor();
+                    }
+                }
+                else if(answer.ToLower() == "n")
+                {
+                    break;
+                }
             }
         }
 
@@ -93,7 +131,11 @@ namespace vcpkg_port_update_alert
             // Start vcpkg-port-update-alert
             AsyncMain().Wait();
 
+            // wait until you type "y" or "n"
+            SaveLog();
+
             // Reset the color and quit
+            VcpkgMessage.NormalMessage("Press any key to quit...");
             Console.ReadKey();
             Console.ResetColor();
         }
