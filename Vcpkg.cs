@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using HtmlAgilityPack;
+using System.IO;
 
 namespace VCPKG
 {
@@ -17,6 +18,7 @@ namespace VCPKG
     {
         private const string repoAddress = "microsoft/vcpkg";
         private static HttpClient httpClient;
+        private static List<string> log = new List<string>();
 
         /// <summary>
         /// Set the BaseAddress and DefaultRequestHeaders on httpClient
@@ -154,6 +156,36 @@ namespace VCPKG
                 return true;
             
             return false;
+        }
+
+        /// <summary>
+        /// Add each need-to-be-update port to the log list
+        /// </summary>
+        public void AddToLog(string updatePort)
+        {
+            log.Add(updatePort);
+        }
+
+        /// <summary>
+        /// Save the log list to the path as .log file
+        /// </summary>
+        public bool SaveLog(string path)
+        {
+            try
+            {
+                // Check the path exists or not. If not exist, try to create the path
+                if(!Directory.Exists(Path.GetDirectoryName(path)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+
+                // Save log list to the path
+                File.WriteAllLines(path, log.ToArray());
+
+                return true;
+            }
+            catch(Exception)
+            {
+                return false;
+            }
         }
     }
 }
