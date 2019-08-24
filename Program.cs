@@ -90,33 +90,39 @@ namespace vcpkg_port_update_alert
 
         static void SaveLog()
         {
+            // Reset the color
             Console.ResetColor();
 
-            while(true)
+            Vcpkg vcpkg = new Vcpkg();
+            
+            // Check the length of log list
+            if(vcpkg.LogLength() > 0)
             {
-                VcpkgMessage.NormalMessage("> Do you want to save ports in a log file? (y/n) ");
-                string answer = Console.ReadLine();
-
-                if(answer.ToLower() == "y")
+                while(true)
                 {
-                    VcpkgMessage.NormalMessage("> Enter the destination file path: ");
-                    string path = Console.ReadLine();
+                    VcpkgMessage.NormalMessage("> Do you want to save ports in a log file? (y/n) ");
+                    string answer = Console.ReadLine();
 
-                    Vcpkg vcpkg = new Vcpkg();
-                    if(vcpkg.SaveLog(path))
+                    if(answer.ToLower() == "y")
                     {
-                        VcpkgMessage.NormalMessage("\n> File successfully saved!\n\n");
+                        VcpkgMessage.NormalMessage("> Enter the destination file path: ");
+                        string path = Console.ReadLine();
+
+                        if(vcpkg.SaveLog(path))
+                        {
+                            VcpkgMessage.NormalMessage("\n> File successfully saved!\n\n");
+                            break;
+                        }
+                        else
+                        {
+                            VcpkgMessage.ErrorMessage("\n> Can't save the file. try again... (See EXAMPLE: C:\\ports.log)\n\n");
+                            Console.ResetColor();
+                        }
+                    }
+                    else if(answer.ToLower() == "n")
+                    {
                         break;
                     }
-                    else
-                    {
-                        VcpkgMessage.ErrorMessage("\n> Can't save the file. try again... (See EXAMPLE: C:\\ports.log)\n\n");
-                        Console.ResetColor();
-                    }
-                }
-                else if(answer.ToLower() == "n")
-                {
-                    break;
                 }
             }
         }
