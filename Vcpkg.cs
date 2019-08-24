@@ -167,6 +167,14 @@ namespace VCPKG
         }
 
         /// <summary>
+        /// Get the length of log list
+        /// </summary>
+        public int LogLength()
+        {
+            return log.Count;
+        }
+
+        /// <summary>
         /// Save the log list to the path as .log file
         /// </summary>
         public bool SaveLog(string path)
