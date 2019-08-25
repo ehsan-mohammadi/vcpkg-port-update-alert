@@ -56,24 +56,13 @@ namespace VCPKG
         }
 
         /// <summary>
-        /// Get the content of portfile.cmake and return it as a string
+        /// Get the url of portfile.cmake and return it as a string
         /// </summary> 
-        private async Task<string> GetPortFileCMake(string portName)
+        private string GetPortFileCMake(string portName)
         {
-            try
-            {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                var url = $"https://github.com/{repoAddress}/blob/master/ports/{portName}/portfile.cmake";
-                
-                HttpClient httpClient = new HttpClient();
-                string portFileCMake = await httpClient.GetStringAsync(url);
-                
-                return portFileCMake;
-            }
-            catch(Exception)
-            {
-                return null;
-            }
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            var url = $"https://github.com/{repoAddress}/blob/master/ports/{portName}/portfile.cmake";
+            return url;
         }
 
         /// <summary>
@@ -85,10 +74,12 @@ namespace VCPKG
 
             try
             {
-                string portFileCMake = await GetPortFileCMake(portName);
+                string portFileUrl = GetPortFileCMake(portName);
 
+                HtmlWeb htmlWeb = new HtmlWeb();
+                htmlWeb.UsingCache = false;
                 HtmlDocument htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(portFileCMake);
+                htmlDocument = await htmlWeb.LoadFromWebAsync(portFileUrl);
                 List<HtmlNode> htmlNodeList = htmlDocument.DocumentNode.SelectNodes("//td")
                         .Where(node => node.GetAttributeValue("class", "")
                         .Equals("blob-code blob-code-inner js-file-line")).ToList();
@@ -107,8 +98,9 @@ namespace VCPKG
             }
             catch(Exception)
             {
-                // Do nothing!
+                return null;
             }
+            
 
             return repoRef;
         }
@@ -129,13 +121,12 @@ namespace VCPKG
             try
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                var url = $"https://github.com/{repo}/releases";
+                var release = $"https://github.com/{repo}/releases";
                 
-                HttpClient httpClient = new HttpClient();
-                string releases = await httpClient.GetStringAsync(url);
-
+                HtmlWeb htmlWeb = new HtmlWeb();
+                htmlWeb.UsingCache = false;
                 HtmlDocument htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(releases);
+                htmlDocument = await htmlWeb.LoadFromWebAsync(release);
                 HtmlNode htmlNode = htmlDocument.DocumentNode.SelectSingleNode("//span[@class='css-truncate-target']");
                 string latestRelease = htmlNode.InnerText;
 
