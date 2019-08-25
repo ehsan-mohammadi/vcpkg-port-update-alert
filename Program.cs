@@ -10,6 +10,9 @@ namespace vcpkg_port_update_alert
 {
     class Program
     {
+        // Static bool to check you pressed ctrl+c
+        public static bool canceling = false;
+
         static void PrintHeaders()
         {
             VcpkgMessage.NormalMessage("vcpkg port update alert\n");
@@ -41,6 +44,9 @@ namespace vcpkg_port_update_alert
                 // Looking for need-to-be-updated ports
                 foreach(string port in ports)
                 {
+                    if(Program.canceling)
+                        break;
+
                     percent++;
                     Console.SetCursorPosition(0, currentLine - 1);
                     VcpkgMessage.NormalMessage($"> Looking for need-to-be-updated ports... ({100 * percent / portsCount}%)");
@@ -84,7 +90,10 @@ namespace vcpkg_port_update_alert
                 Console.SetCursorPosition(0, currentLine);
 
                 // Finish
-                VcpkgMessage.NormalMessage("\n> All ports checked!\n\n");
+                if(!Program.canceling)
+                    VcpkgMessage.NormalMessage("\n> All ports checked!\n\n");
+                else
+                    VcpkgMessage.NormalMessage("\n> Task cancelled by user\n\n");
             }
         }
 
@@ -129,6 +138,12 @@ namespace vcpkg_port_update_alert
 
         static void Main(string[] args)
         {
+            Console.CancelKeyPress += delegate(object sender, ConsoleCancelEventArgs e)
+            {
+                e.Cancel = true;
+                Program.canceling = true;
+            };
+
             // Set console title and Show the header
             Console.Title = "vcpkg-port-update-alert - version: 1.0";
             PrintHeaders();
